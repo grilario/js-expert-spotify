@@ -1,0 +1,25 @@
+{
+  "name": "js-expert",
+  "version": "1.0.0",
+  "main": "server/index.js",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "nodemon server/index.js",
+    "test": "LOG_DISABLE=true NODE_OPTIONS=--experimental-vm-modules jest --no-cache ",
+    "test:watch": "LOG_DISABLE=true NODE_OPTIONS=--experimental-vm-modules jest --no-cache --watchAll",
+    "test:coverage": "LOG_DISABLE=true NODE_OPTIONS=--experimental-vm-modules jest --no-cache --coverage tests/unit"
+  },
+  "engines": {
+    "node": "16"
+  },
+  "devDependencies": {
+    "jest": "^27.5.1",
+    "nodemon": "2"
+  },
+  "dependencies": {
+    "pino": "^7.8.1",
+    "pino-pretty": "^7.5.3"
+  }
+}
