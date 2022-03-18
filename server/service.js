@@ -9,12 +9,19 @@ import { once } from "events";
 import Throttle from "throttle";
 
 import config from "./config.js";
-import { join, extname } from "path";
+import path, { join, extname } from "path";
 import { logger } from "./utils.js";
 
 const {
-  dir: { publicDirectory },
-  constants: { fallbackBitRate, englishConversation, bitRateDivisor },
+  dir: { publicDirectory, fxDirectory },
+  constants: {
+    fallbackBitRate,
+    englishConversation,
+    bitRateDivisor,
+    audioMediaType,
+    songVolume,
+    fxVolume,
+  },
 } = config;
 
 export class Service {
@@ -54,13 +61,10 @@ export class Service {
       const args = ["--i", "-B", song];
 
       const { stderr, stdout } = this._executeSoxCommand(args);
-      await Promise.all([
-        once(stderr, 'readable'),
-        once(stdout, 'readable')
-      ])
+      await Promise.all([once(stderr, "readable"), once(stdout, "readable")]);
       const [sucess, error] = [stdout, stderr].map((stream) => stream.read());
       if (error) return await Promise.reject(error);
-      
+
       return sucess.toString().trim().replace("k", "000");
     } catch (error) {
       logger.error(`lascou no bitrate: ${error}`);
@@ -91,7 +95,10 @@ export class Service {
     const bitRate = (this.currentBitRate =
       (await this.getBitRate(this.currentSong)) / bitRateDivisor);
 
-    const throttleTransform = (this.throttleTransform = new Throttle(bitRate));
+    const throttleTransform = (this.throttleTransform = new Throttle({
+      bps: bitRate,
+      chunkSize: bitRate / 20,
+    }));
     const songReadable = (this.currentReadable = this.createFileStream(
       this.currentSong
     ));
@@ -103,7 +110,7 @@ export class Service {
   }
 
   async stopStreamming() {
-    this.throttleTransform?.end?.()
+    this.throttleTransform?.end?.();
   }
 
   async getFileInfo(file) {
@@ -124,5 +131,66 @@ export class Service {
       stream: this.createFileStream(name),
       type,
     };
+  }
+
+  async readFxByName(fxName) {
+    const FXs = await fs.promises.readdir(fxDirectory);
+    const chosenFx = FXs.find((filename) =>
+      filename.toLowerCase().includes(fxName)
+    );
+    if (!chosenFx)
+      return new Promise.reject(`The song ${fxName} wasn't found!`);
+
+    return path.join(fxDirectory, chosenFx);
+  }
+
+  appendFxStream(fx) {
+    const throttleTransformable = new Throttle({
+      bps: this.currentBitRate,
+      chunkSize: this.currentBitRate / 20,
+    });
+    streamsPromises.pipeline(throttleTransformable, this.broadCast());
+
+    const unpipe = () => {
+      const transformStream = this.mergeAudioStreams(fx, this.currentReadable);
+
+      this.throttleTransform = throttleTransformable;
+      this.currentReadable = transformStream;
+      this.currentReadable.removeListener("unpipe", unpipe);
+
+      streamsPromises.pipeline(transformStream, throttleTransformable);
+    };
+
+    this.throttleTransform.on("unpipe", unpipe);
+    this.throttleTransform.pause();
+    this.currentReadable.unpipe(this.throttleTransform);
+  }
+
+  mergeAudioStreams(song, readable) {
+    const transformStream = PassThrough();
+    const args = [
+      "-t",
+      audioMediaType,
+      "-v",
+      songVolume,
+      "-m",
+      "-",
+      "-t",
+      audioMediaType,
+      "-v",
+      fxVolume,
+      song,
+      "-t",
+      audioMediaType,
+      "-",
+    ];
+
+    const { stdout, stdin } = this._executeSoxCommand(args);
+
+    streamsPromises.pipeline(readable, stdin);
+
+    streamsPromises.pipeline(stdout, transformStream);
+
+    return transformStream;
   }
 }

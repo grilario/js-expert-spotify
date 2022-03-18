@@ -15,20 +15,20 @@ Acesse a [**comunidade exclusiva no discord**](https://bit.ly/semanajsexpert-dis
     - [ ] Deve atingir 100% de cobertura de código em testes
     - [ ] Deve ter testes end to end validando todas as rotas da API
     - [x] Deve entregar arquivos estáticos como Node.js Stream
-    - [X] Deve entregar arquivos de música como Node.js Stream
-    - [X] Dado um usuário desconectado, não deve quebrar a API
-    - [ ] Mesmo que vários comandos sejam desparados ao mesmo tempo, não deve quebrar a API
+    - [x] Deve entregar arquivos de música como Node.js Stream
+    - [x] Dado um usuário desconectado, não deve quebrar a API
+    - [x] Mesmo que vários comandos sejam desparados ao mesmo tempo, não deve quebrar a API
     - [x] Caso aconteça um erro inesperado, a API deve continuar funcionando
-    - [X] O projeto precisa ser executado em ambientes Linux, Mac e Windows
+    - [x] O projeto precisa ser executado em ambientes Linux, Mac e Windows
 
 - Web App 
     - Client
-        - [X] Deve reproduzir a transmissão
-        - [ ] Não deve pausar se algum efeito for adicionado
+        - [x] Deve reproduzir a transmissão
+        - [x] Não deve pausar se algum efeito for adicionado
     - Controller
         - [ ] Deve atingir 100% de cobertura de código em testes
-        - [ ] Deve poder iniciar ou parar uma transmissão 
-        - [ ] Deve enviar comandos para adicionar audio efeitos à uma transmissão
+        - [x] Deve poder iniciar ou parar uma transmissão 
+        - [x] Deve enviar comandos para adicionar audio efeitos à uma transmissão
 
 ## Tarefas por aula
 
