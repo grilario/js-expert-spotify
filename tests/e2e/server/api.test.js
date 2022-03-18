@@ -77,7 +77,7 @@ describe("API E2E Suit Test", () => {
       const server = await getTestServer();
       const url = "/home";
       const { status, text } = await server.testServer.get(url);
-      const homePage = fs.readFileSync(`${publicDirectory}/${homeHTML}`)
+      const homePage = await fs.promises.readFile(`${publicDirectory}/${homeHTML}`)
 
       await setTimeout(RETENTION_DATA_PERIOD);
       server.kill();
@@ -90,7 +90,7 @@ describe("API E2E Suit Test", () => {
       const server = await getTestServer();
       const url = "/controller";
       const { status, text } = await server.testServer.get(url);
-      const homePage = fs.readFileSync(`${publicDirectory}/${controllerHTML}`)
+      const homePage = await fs.promises.readFile(`${publicDirectory}/${controllerHTML}`)
 
       await setTimeout(RETENTION_DATA_PERIOD);
       server.kill();

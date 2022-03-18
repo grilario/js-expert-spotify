@@ -104,7 +104,7 @@ describe("#Routes", () => {
     expect(createClientStream).toHaveBeenCalled();
     expect(params.response.writeHead).toHaveBeenCalledWith(200, {
       "Content-Type": "audio/mpeg",
-      "Accept-Rages": "bytes",
+      "Accept-Ranges": "bytes",
     });
     expect(mockStream.pipe).toHaveBeenCalledWith(params.response);
   });

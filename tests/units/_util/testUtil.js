@@ -1,5 +1,3 @@
-/* istanbul ignore file */
-
 import { jest } from "@jest/globals";
 import { Readable, Writable } from "stream";
 
@@ -27,7 +25,7 @@ export default class TestUtil {
 
   static defaultHandleParams() {
     const requestStream = TestUtil.generateReadableStream(["data"]);
-    const responseStream = TestUtil.generateWritableStream(() => {});
+    const responseStream = TestUtil.generateWritableStream();
 
     const data = {
       request: Object.assign(requestStream, {
