@@ -28,6 +28,7 @@ describe("API E2E Suit Test", () => {
     const possibleCommands = {
       start: "start",
       stop: "stop",
+      fart: "fart"
     };
     async function getTestServer() {
       const getSuperTest = (port) => superTest(`http://localhost:${port}`);
@@ -161,7 +162,26 @@ describe("API E2E Suit Test", () => {
       const [[buffer]] = onChunk.mock.calls;
 
       expect(buffer).toBeInstanceOf(Buffer);
-      expect(buffer.length).toBeGreaterThan(1000);
+      expect(buffer.length).toBeGreaterThan(500);
+
+      server.kill();
+    });
+
+    test("it should received data stream if the process is playing and fx added", async () => {
+      const server = await getTestServer();
+      const onChunk = jest.fn();
+      const { send } = commandSender(server.testServer);
+      pipeAndReadStreamData(server.testServer.get("/stream"), onChunk);
+
+      await send(possibleCommands.start);   
+      await send(possibleCommands.fart);
+      await setTimeout(RETENTION_DATA_PERIOD);
+      await send(possibleCommands.stop);
+
+      const [[buffer]] = onChunk.mock.calls;
+
+      expect(buffer).toBeInstanceOf(Buffer);
+      expect(buffer.length).toBeGreaterThan(500);
 
       server.kill();
     });

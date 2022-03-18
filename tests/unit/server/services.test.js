@@ -128,7 +128,7 @@ describe("#Services", () => {
 
     const result = await service.getBitRate(song);
 
-    expect(execCommand).toHaveBeenCalledWith(args); 
+    expect(execCommand).toHaveBeenCalledWith(args);
     expect(result).toBe(bitRate[1]);
   });
 
@@ -188,9 +188,107 @@ describe("#Services", () => {
     const end = jest.fn();
     service.throttleTransform = { end };
 
-    await service.stopStreamming()
+    await service.stopStreamming();
 
-    expect(end).toHaveBeenCalled()
+    expect(end).toHaveBeenCalled();
+  });
+
+  test("it should return filename of the fx acronym", async () => {
+    const fxName = "fart";
+    const filename = "fart.mp3";
+
+    const readDir = jest
+      .spyOn(fs.promises, fs.promises.readdir.name)
+      .mockResolvedValue([filename]);
+
+    const result = await service.readFxByName(fxName);
+
+    expect(readDir).toHaveBeenCalledWith(config.dir.fxDirectory);
+    expect(result).toBe(join(config.dir.fxDirectory, filename));
+  });
+
+  test("it should append fx stream in the pipeline", async () => {
+    const fx = "fart";
+
+    const simulatedThis = {};
+    const onEvent = jest.fn((event, unpipe) => {
+      expect(event).toBe("unpipe");
+      simulatedThis.unpipe = unpipe;
+    });
+    const pause = jest.fn();
+    const removeListener = jest.fn((event, unpipe) => {
+      expect(event).toBe("unpipe");
+      expect(unpipe).toStrictEqual(simulatedThis.unpipe);
+    });
+    const unpipe = jest.fn(() => {
+      simulatedThis.unpipe();
+    });
+
+    const pipeline = jest
+      .spyOn(StreamPromises, StreamPromises.pipeline.name)
+      .mockReturnValue();
+    const mergeAudioStreams = jest
+      .spyOn(service, service.mergeAudioStreams.name)
+      .mockReturnValue({
+        removeListener,
+      });
+
+    service.throttleTransform = {
+      on: onEvent,
+      pause: pause,
+    };
+    const currentReadable = (service.currentReadable = { unpipe });
+
+    service.appendFxStream(fx);
+
+    expect(pipeline).toHaveBeenCalledTimes(2);
+    expect(onEvent).toHaveBeenCalled();
+    expect(pause).toHaveBeenCalled();
+    expect(unpipe).toHaveBeenCalled();
+    expect(mergeAudioStreams).toHaveBeenCalledWith(fx, currentReadable);
+  });
+
+  test("it should create tranform stream that merges audios", async () => {
+    const song = "tutis tutis";
+    const readable = "quero ver";
+    const stdout = "";
+    const stdin = "";
+
+    const {
+      constants: { audioMediaType, songVolume, fxVolume },
+    } = config;
+    const args = [
+      "-t",
+      audioMediaType,
+      "-v",
+      songVolume,
+      "-m",
+      "-",
+      "-t",
+      audioMediaType,
+      "-v",
+      fxVolume,
+      song,
+      "-t",
+      audioMediaType,
+      "-",
+    ];
+
+    const executeCommnad = jest
+      .spyOn(service, service._executeSoxCommand.name)
+      .mockReturnValue({
+        stdout,
+        stdin,
+      });
+    const pipeline = jest
+      .spyOn(StreamPromises, StreamPromises.pipeline.name)
+      .mockReturnValue();
+
+    const result = service.mergeAudioStreams(song, readable);
+
+    expect(executeCommnad).toHaveBeenCalledWith(args);
+    expect(pipeline).toHaveBeenCalledTimes(2);
+    expect(result).toBeInstanceOf(PassThrough);
   });
 
   describe("Exceptions", () => {
@@ -223,15 +321,26 @@ describe("#Services", () => {
 
       const stderr = TestUtil.generateReadableStream(["error"]);
       const stdout = TestUtil.generateReadableStream("");
-  
+
       const execCommand = jest
         .spyOn(service, service._executeSoxCommand.name)
         .mockReturnValue({ stderr, stdout });
-  
+
       const result = await service.getBitRate(song);
-  
+
       expect(execCommand).toHaveBeenCalledWith(args);
       expect(result).toBe(config.constants.fallbackBitRate);
-    })
+    });
+
+    test("it should return error when fxName not exists", async () => {
+      const fxName = "salve";
+
+      const readDir = jest
+        .spyOn(fs.promises, fs.promises.readdir.name)
+        .mockResolvedValue([]);
+
+      expect(service.readFxByName(fxName)).rejects.toThrow();
+      expect(readDir).toHaveBeenCalledWith(config.dir.fxDirectory);
+    });
   });
 });

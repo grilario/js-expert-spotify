@@ -82,6 +82,28 @@ describe("#Controller", () => {
     expect(removeClientStream).toHaveBeenCalledWith(id)
   });
 
+  test("it should handle command to add fx", async () => {
+    const command = { command: "fair" };
+    const expectedResult = { result: "ok" };
+    const chosenFx = "fx/fair.mp3" 
+
+    const readFxByName = jest.spyOn(
+      Service.prototype,
+      Service.prototype.readFxByName.name
+    ).mockResolvedValue(chosenFx);
+
+    const appendFxStream = jest.spyOn(
+      Service.prototype,
+      Service.prototype.appendFxStream.name
+    ).mockReturnValue();
+
+    const result = await controller.handleCommand(command);
+
+    expect(readFxByName).toHaveBeenCalledWith(command.command);
+    expect(appendFxStream).toHaveBeenCalledWith(chosenFx)
+    expect(result).toStrictEqual(expectedResult);
+  })
+
   describe("#Exceptions", () => {
     test("should return an error if file does not exist", async () => {
       const filename = "/auuuu.html";
@@ -97,9 +119,7 @@ describe("#Controller", () => {
     test("it should not handle commnad", async () => {
       const command = { command: "zuumm" };
 
-      const result = await controller.handleCommand(command);
-  
-      expect(result).toBeUndefined();
+      expect(controller.handleCommand(command)).rejects.toThrow()
     })
   });
 });

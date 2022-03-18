@@ -139,7 +139,7 @@ export class Service {
       filename.toLowerCase().includes(fxName)
     );
     if (!chosenFx)
-      return new Promise.reject(`The song ${fxName} wasn't found!`);
+      return Promise.reject(new Error(`The song ${fxName} wasn't found!`));
 
     return path.join(fxDirectory, chosenFx);
   }
@@ -167,7 +167,7 @@ export class Service {
   }
 
   mergeAudioStreams(song, readable) {
-    const transformStream = PassThrough();
+    const transformStream = new PassThrough();
     const args = [
       "-t",
       audioMediaType,
