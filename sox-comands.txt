@@ -1,0 +1,31 @@
+sox \
+  --i \
+  "audio/songs/conversation.mp3"
+
+
+// Converter bitrate
+sox \
+  -v 0.99 \
+  -t mp3 \
+  "audio/fx/Applause Sound Effect HD No Copyright (128 kbps).mp3" \
+  -r 48000 \
+  -t mp3 \
+  "output.mp3"
+
+
+// Obter bitrate
+sox \
+  --i \
+  -B \
+  "audio/songs/conversation.mp3"
+
+// Concatenar dois audios
+sox \
+  -t mp3 \
+  -v 0.99 \
+  -m "audio/songs/conversation.mp3" \
+  -t mp3 \
+  -v 0.99 \
+  "audio/fx/Fart - Gaming Sound Effect (HD) (128 kbps).mp3" \
+  -t mp3 \
+  "output.mp3"

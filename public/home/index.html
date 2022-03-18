@@ -147,7 +147,7 @@
     </div>
 
     <div class="audio-player">
-      <audio id="audio" preload="none" controls autoplay src="/audio/songs/conversation.mp3"></audio>
+      <audio id="audio" preload="auto" src="" controls autoplay></audio>
 
       <div class="player-controls">
         <div class="player__actions">
@@ -173,6 +173,12 @@
     <p>Listening on Erick Wendel</p>
   </div>
   <script src="./home/js/animation.js"></script>
+  <script>
+    window.addEventListener("DOMContentLoaded", () => {
+      const audio = document.getElementById("audio");
+      audio.src = "/stream" + Date.now();
+    })
+  </script>
 </body>
 
 </html>

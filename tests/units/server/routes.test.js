@@ -36,7 +36,7 @@ describe("#Routes", () => {
     params.request.method = "GET";
     params.request.url = "/home";
 
-    const mockFileStream = TestUtil.genereateReadableStream([
+    const mockFileStream = TestUtil.generateReadableStream([
       "<h1>Hello World</h1>",
     ]);
 
@@ -62,7 +62,7 @@ describe("#Routes", () => {
     params.request.method = "GET";
     params.request.url = "/controller";
 
-    const mockFileStream = TestUtil.genereateReadableStream([
+    const mockFileStream = TestUtil.generateReadableStream([
       "<h1>Hello World</h1>",
     ]);
 
@@ -82,6 +82,57 @@ describe("#Routes", () => {
     expect(mockFileStream.pipe).toHaveBeenCalledWith(params.response);
   });
 
+  test("GET /stream - should response with audio stream", async () => {
+    const params = TestUtil.defaultHandleParams();
+
+    params.request.method = "GET";
+    params.request.url = "/stream";
+
+    const mockStream = TestUtil.generateReadableStream(["Hello"]);
+    const onClose = jest.fn();
+
+    const createClientStream = jest
+      .spyOn(Controller.prototype, Controller.prototype.createClientStream.name)
+      .mockReturnValue({
+        stream: mockStream,
+        onClose,
+      });
+    jest.spyOn(mockStream, "pipe").mockReturnValue();
+
+    await handler(...params.values());
+
+    expect(createClientStream).toHaveBeenCalled();
+    expect(params.response.writeHead).toHaveBeenCalledWith(200, {
+      "Content-Type": "audio/mpeg",
+      "Accept-Rages": "bytes",
+    });
+    expect(mockStream.pipe).toHaveBeenCalledWith(params.response);
+  });
+
+  test("POST /controller - should response with expected", async () => {
+    const command = '{ "command": "start" }';
+    const result = { result: "ok" };
+
+    const mockReadableStream = TestUtil.generateReadableStream([command]);
+
+    jest
+      .spyOn(TestUtil, TestUtil.generateReadableStream.name)
+      .mockReturnValue(mockReadableStream);
+
+    const params = TestUtil.defaultHandleParams();
+    params.request.method = "POST";
+    params.request.url = "/controller";
+
+    jest
+      .spyOn(Controller.prototype, Controller.prototype.handleCommand.name)
+      .mockResolvedValue(result);
+
+    await handler(...params.values());
+
+    expect(Controller.prototype.handleCommand).toHaveBeenCalled();
+    expect(params.response.end).toHaveBeenCalledWith(JSON.stringify(result));
+  });
+
   test("GET /style.css - should response with file stream", async () => {
     const params = TestUtil.defaultHandleParams();
 
@@ -89,7 +140,7 @@ describe("#Routes", () => {
     params.request.method = "GET";
     params.request.url = filename;
 
-    const mockFileStream = TestUtil.genereateReadableStream([
+    const mockFileStream = TestUtil.generateReadableStream([
       "h1 { color: red; }",
     ]);
     const expectedType = ".css";
@@ -119,7 +170,7 @@ describe("#Routes", () => {
     params.request.method = "GET";
     params.request.url = filename;
 
-    const mockFileStream = TestUtil.genereateReadableStream([
+    const mockFileStream = TestUtil.generateReadableStream([
       "h1 { color: red; }",
     ]);
     const expectedType = ".ext";
