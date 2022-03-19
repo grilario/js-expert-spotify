@@ -11,6 +11,7 @@
     "test:watch": "LOG_DISABLE=true NODE_OPTIONS='--experimental-vm-modules --no-warnings' jest --no-cache --watchAll",
     "test:coverage": "LOG_DISABLE=true NODE_OPTIONS='--experimental-vm-modules --no-warnings' jest --force-exit --no-cache --coverage tests/unit",
 
+    "start:docker": "docker-compose up --build start",
     "dev:docker": "docker-compose up --build dev",
     "test:docker": "docker-compose up --build test",
     "test:watch:docker": "docker-compose up --build test-watch",
