@@ -12,7 +12,7 @@ Acesse a [**comunidade exclusiva no discord**](https://bit.ly/semanajsexpert-dis
 ## Checklist Features
 
 - Web API
-    - [ ] Deve atingir 100% de cobertura de código em testes
+    - [x] Deve atingir 100% de cobertura de código em testes
     - [ ] Deve ter testes end to end validando todas as rotas da API
     - [x] Deve entregar arquivos estáticos como Node.js Stream
     - [x] Deve entregar arquivos de música como Node.js Stream
